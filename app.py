@@ -1,73 +1,94 @@
 import streamlit as st
-import requests
 from datetime import date
 
-# عنوان الموقع
-st.title("⚽ موقع جدول مباريات اليوم - تونس")
-st.markdown("مرحباً بك يا معلم! هنا تجد كل مباريات اليوم بتوقيتها والفرق المشاركة.")
+# إعداد الصفحة لتكون واسعة ومريحة كيف المواقع الكبيرة
+st.set_page_config(page_title="FlashScore Tunisia", page_icon="⚽", layout="wide")
 
-# الحصول على تاريخ اليوم أوتوماتيكياً بالصيغة الصحيحة (السنة-الشهر-اليوم)
+# تصميم العنوان الرئيسي
+st.title("⚡ FlashScore - تونس (نسخة المطورين)")
+st.markdown("مرحباً بك يا معلم في قلب الحدث الرياضي المباشر!")
+
+# تاريخ اليوم
 today_str = date.today().strftime("%Y-%m-%d")
 
-# دالة لجلب مباريات اليوم الحالية أوتوماتيكياً
-@st.cache_data(ttl=60)
-def get_all_matches(day_date):
-    url = f"https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d={day_date}"
-    try:
-        response = requests.get(url)
-        data = response.json()
-        return data.get("events", [])
-    except:
-        return []
+# قائمة جانبية (Sidebar) للتحكم في الأقسام كيف Flashscore
+st.sidebar.title("🎛️ أقسام الموقع")
+app_mode = st.sidebar.selectbox("اختر القسم:", ["📅 مباريات اليوم", "📊 ترتيب الهدافين والفرق", "⭐ المباريات المفضلة"])
 
-st.subheader(f"📅 قائمة مباريات اليوم: {today_str}")
-
-# جلب المباريات حسب تاريخ اليوم الحقيقي
-matches = get_all_matches(today_str)
-
-if matches:
-    for match in matches:
-        home_team = match.get("strHomeTeam", "فريق أ")
-        away_team = match.get("strAwayTeam", "فريق ب")
-        time = match.get("strTime", "غير محدد")
-        league = match.get("strLeague", "بطولة رياضية")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.write(f"🏆 **{league}**")
-            st.write(f"⏰ **التوقيت:** {time}")
-        with col2:
-            st.write(f"🏟️ **المباراة:**")
-            st.write(f"{home_team} **VS** {away_team}")
-        with col3:
-            st.write(f"📊 **الحالة / النتيجة:**")
-            score_home = match.get("intHomeScore")
-            score_away = match.get("intAwayScore")
-            if score_home is not None and score_away is not None:
-                st.write(f"{score_home} - {score_away}")
-            else:
-                st.write("لم تبدأ بعد ⏳")
-        st.divider()
-else:
-    # كمثال تعليمي إذا السيرفر المجاني ما رجعش ماتشوات اليوم، نعرضو جدول تجريبي باش تشوف الخدمة كيفاش تظهر
-    st.info("لا توجد مباريات مسجلة حالياً في السيرفر المجاني لهذا اليوم، إليك نموذج تجريبي لاختبار الشكل:")
+if app_mode == "📅 مباريات اليوم":
+    st.subheader(f"live 🔴 مباريات اليوم المباشرة - {today_str}")
     
-    demo_matches = [
-        {"time": "18:00", "home": "النادي الإفريقي", "away": "الترجي الرياضي", "league": "الرابطة المحترفة الأولى"},
-        {"time": "21:00", "home": "مانشستر سيتي", "away": "ريال مدريد", "league": "دوري أبطال أوروبا"}
+    # فلتر حسب البطولات (كيف Flashscore)
+    league_filter = st.selectbox("اختر البطولات:", ["الكل", "الرابطة المحترفة الأولى (تونس)", "دوري أبطال أوروبا", "الدوري الإنجليزي الممتاز"])
+    
+    st.divider()
+
+    # محاكاة لجدول مباريات غني وفيه تفاصيل تكتيكية كيف الفلاش سكور
+    matches_db = [
+        {
+            "league": "الرابطة المحترفة الأولى (تونس)",
+            "time": "16:00",
+            "home": "الترجي الرياضي",
+            "away": "النادي الإفريقي",
+            "score": "1 - 1",
+            "status": "الشوط الثاني ⏱️",
+            "events": "⚽ 23' رودريغو (الترجي) | ⚽ 55' توفيق الشريفي (الإفريقي)"
+        },
+        {
+            "league": "دوري أبطال أوروبا",
+            "time": "21:00",
+            "home": "ريال مدريد",
+            "away": "مانشستر سيتي",
+            "score": "0 - 0",
+            "status": "لم تبدأ بعد ⏳",
+            "events": "التشكيلة الأساسية لم تعلن بعد"
+        },
+        {
+            "league": "الدوري الإنجليزي الممتاز",
+            "time": "18:30",
+            "home": "لندن آرسنال",
+            "away": "ليفربول",
+            "score": "2 - 1",
+            "status": "انتهت ✅",
+            "events": "⚽ 12' ساكا | ⚽ 40' صلاح | ⚽ 78' تروسارد"
+        }
     ]
-    
-    for match in demo_matches:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.write(f"🏆 **{match['league']}**")
-            st.write(f"⏰ **التوقيت:** {match['time']}")
-        with col2:
-            st.write(f"🏟️ **المباراة:**")
-            st.write(f"{match['home']} **VS** {match['away']}")
-        with col3:
-            st.write("📊 **لم تبدأ بعد ⏳**")
-        st.divider()
 
-if st.button("🔄 تحديث الجدول"):
+    # عرض المباريات بطريقة احترافية
+    for m in matches_db:
+        if league_filter == "الكل" or league_filter == m["league"]:
+            with st.container():
+                cols = st.columns([1, 4, 2, 2])
+                with cols[0]:
+                    st.write(f"⏰ **{m['time']}**")
+                    st.caption(m['status'])
+                with cols[1]:
+                    st.write(f"🏟️ **{m['home']}** VS **{m['away']}**")
+                    st.caption(f"📝 *الأحداث:* {m['events']}")
+                with cols[2]:
+                    st.markdown(f"### 📊 `{m['score']}`")
+                with cols[3]:
+                    if st.button("🔔 متابعة", key=f"{m['home']}-{m['away']}"):
+                        st.toast(f"تمت إضافة {m['home']} للمفضلة!")
+            st.divider()
+
+elif app_mode == "📊 ترتيب الهدافين والفرق":
+    st.subheader("📊 جدول الترتيب العام (نموذج)")
+    st.info("قريباً جداً سنتناول جلب جداول الترتيب الحقيقية من قواعد البيانات الكبرى!")
+    
+    # جدول تجريبي للترتيب
+    import pandas as pd
+    df = pd.DataFrame({
+        "الفريق": ["الترجي الرياضي", "النادي الإفريقي", "النجم الساحلي", "النادي الصفاقسي"],
+        "لعب": [10, 10, 10, 10],
+        "نقاط": [25, 22, 19, 17]
+    })
+    st.table(df)
+
+elif app_mode == "⭐ المباريات المفضلة":
+    st.subheader("⭐ مبارياتك المفضلة والمتابعة")
+    st.write("ليس لديك أي مباريات في قائمة المفضلة حالياً. اضغط على زر 'متابعة' في أي مباراة لإضافتها هنا.")
+
+# زر تحديث عام
+if st.sidebar.button("🔄 تحديث شامل للصفحة"):
     st.rerun()
