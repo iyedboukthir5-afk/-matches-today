@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from datetime import date
 
-# إعدادات الصفحة الكبرى
+# Page configuration
 st.set_page_config(page_title="Global Football LiveScore", page_icon="🌐", layout="wide")
 
 st.title("🌍 شبكة كورة العالم - LiveScore Global Pro")
@@ -10,7 +10,7 @@ st.markdown("مرحباً بك يا معلم! هنا السيرفر المركز
 
 today_str = date.today().strftime("%Y-%m-%d")
 
-# قائمة جانبية ضخمة لاختيار قارات ودوريات العالم الكل
+# Sidebar filters
 st.sidebar.title("🏆 تصفية دوريات العالم")
 continent_filter = st.sidebar.selectbox("اختر القارة أو المنطقة:", [
     "🌍 كل مباريات العالم (الكل)",
@@ -27,7 +27,7 @@ search_query = st.sidebar.text_input("🔍 ابحث عن فريق أو بطول�
 
 st.subheader(f"📅 مباريات اليوم في جميع أنحاء العالم - {today_str}")
 
-# دالة ذكية جداً لجلب كل مباريات العالم من السيرفر الرياضي العالمي
+# Fetch global matches function
 @st.cache_data(ttl=60)
 def fetch_global_matches():
     url = f"https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d={today_str}"
@@ -51,7 +51,6 @@ if matches:
             filtered_matches.append(match)
 
     if filtered_matches:
-        # تم تصحيح الخطأ هنا بإضافة علامات التنصيص بداخل دالة st.success
         st.success(f"تم العثور على {len(filtered_matches)} مباراة تبث حالياً حول العالم 🔴")
         
         for match in filtered_matches:
